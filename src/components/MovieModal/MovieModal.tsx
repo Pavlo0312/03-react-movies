@@ -1,44 +1,82 @@
-import styles from "./MovieModal.module.css";
-import type { Movie } from "../../types/movie";
-import { backdropUrl, posterUrl } from "../../services/movieService";
+import { useEffect, type MouseEvent } from "react";
+import { createPortal } from "react-dom";
 
-interface Props {
+import type { Movie } from "../../types/movie";
+import { backdropUrl } from "../../services/movieService";
+import styles from "./MovieModal.module.css";
+
+export interface MovieModalProps {
   movie: Movie;
   onClose: () => void;
 }
 
-export default function MovieModal({ movie, onClose }: Props) {
-  return (
-    <div className={styles.backdrop} onClick={onClose}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-        {movie.backdrop_path && (
-          <img
-            className={styles.backdropImg}
-            src={backdropUrl(movie.backdrop_path)}
-            alt={movie.title}
+export default function MovieModal({ movie, onClose }: MovieModalProps) {
+  // Закриваємо по Esc + блокуємо скрол під модалкою
+  useEffect(() => {
+    const onKeyDown = (e: globalThis.KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [onClose]);
+
+  // Закриття по кліку на бекдроп
+  const handleBackdropClick = (e: MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) onClose();
+  };
+
+  const bg = backdropUrl(movie.backdrop_path);
+
+  // Рендеримо через портал у body
+  return createPortal(
+    <div
+      className={styles.backdrop}
+      onClick={handleBackdropClick}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="movie-title"
+    >
+      <div className={styles.modal}>
+        <button
+          type="button"
+          className={styles.close}
+          aria-label="Close"
+          onClick={onClose}
+        >
+          ×
+        </button>
+
+        <header className={styles.header}>
+          <div
+            className={styles.cover}
+            style={{ backgroundImage: `url(${bg})` }}
           />
-        )}
-        <div className={styles.body}>
-          <img
-            className={styles.poster}
-            src={posterUrl(movie.poster_path)}
-            alt={movie.title}
-          />
-          <div className={styles.info}>
-            <h2 className={styles.title}>{movie.title}</h2>
-            <div className={styles.sub}>
-              {movie.release_date?.slice(0, 4) || "—"} • ⭐{" "}
-              {movie.vote_average.toFixed(1)}
-            </div>
-            <p className={styles.overview}>
-              {movie.overview || "No overview."}
-            </p>
-            <button className={styles.close} onClick={onClose}>
-              Close
-            </button>
-          </div>
+        </header>
+
+        <div className={styles.content}>
+          <h2 id="movie-title" className={styles.title}>
+            {movie.title}
+          </h2>
+
+          <p className={styles.overview}>{movie.overview}</p>
+
+          <p className={styles.meta}>
+            <strong>Release:</strong> {movie.release_date}
+          </p>
+          <p className={styles.meta}>
+            <strong>Rating:</strong> {movie.vote_average}
+          </p>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

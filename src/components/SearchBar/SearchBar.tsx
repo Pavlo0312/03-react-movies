@@ -1,4 +1,4 @@
-import type { FormEvent } from "react";
+// src/components/SearchBar/SearchBar.ts
 import styles from "./SearchBar.module.css";
 
 export interface SearchBarProps {
@@ -6,14 +6,11 @@ export interface SearchBarProps {
 }
 
 export default function SearchBar({ onSubmit }: SearchBarProps) {
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const form = e.currentTarget;
-    const input = form.elements.namedItem("query") as HTMLInputElement;
-    const value = input.value.trim();
-    onSubmit(value);
-    form.reset();
-  };
+  // React Form Action – приймає FormData
+  async function action(formData: FormData) {
+    const query = String(formData.get("query") ?? "").trim();
+    if (query) onSubmit(query);
+  }
 
   return (
     <header className={styles.header}>
@@ -22,15 +19,15 @@ export default function SearchBar({ onSubmit }: SearchBarProps) {
           className={styles.link}
           href="https://www.themoviedb.org/"
           target="_blank"
-          rel="noreferrer noopener">
+          rel="noopener noreferrer">
           Powered by TMDB
         </a>
 
-        <form className={styles.form} onSubmit={handleSubmit}>
+        <form className={styles.form} action={action}>
           <input
             className={styles.input}
-            type="text"
             name="query"
+            type="text"
             placeholder="Search movies..."
             autoComplete="off"
           />
