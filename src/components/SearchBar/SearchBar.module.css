@@ -1,0 +1,33 @@
+.header {
+  margin-bottom: 24px;
+}
+.container {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.link {
+  font-size: 14px;
+  opacity: 0.8;
+}
+.form {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+}
+.input {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #334155;
+  background: #0b1223;
+  color: #e2e8f0;
+}
+.button {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #334155;
+  background: #1e293b;
+  color: #e2e8f0;
+  cursor: pointer;
+}
